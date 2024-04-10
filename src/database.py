@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine
+from typing import Annotated
+from sqlalchemy import String, create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from config import settings
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
