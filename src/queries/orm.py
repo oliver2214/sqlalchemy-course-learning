@@ -1,6 +1,6 @@
-from models import WorkerORM
+from models import WorkerORM, ResumeORM
 from database import Base, session_factory, sync_engine, async_session_factory
-from sqlalchemy import select
+from sqlalchemy import Integer, and_, func, select
 
 
 class SyncORM:
@@ -15,6 +15,23 @@ class SyncORM:
         worker_vlad = WorkerORM(username="Vlad")
         with session_factory() as session:
             session.add_all([worker_bobr, worker_vlad])
+            session.commit()
+
+    @staticmethod
+    def insert_resume(title,
+                      compensation,
+                      workload,
+                      worker_id,
+                      created_at=None,
+                      updated_at=None):
+        with session_factory() as session:
+            resume = ResumeORM(title=title,
+                               compensation=compensation,
+                               workload=workload,
+                               worker_id=worker_id,
+                               created_at=created_at,
+                               updated_at=updated_at)
+            session.add(resume)
             session.commit()
 
     @staticmethod
@@ -38,6 +55,24 @@ class SyncORM:
             worker.username = worker.username + "123"
             session.refresh(worker)
             session.commit()
+
+    @staticmethod
+    def select_resumes():
+        with session_factory() as session:
+            query = select(
+                ResumeORM.workload,
+                func.avg(ResumeORM.compensation).cast(Integer).label("avg_compensation")
+            )\
+            .filter(and_(
+                ResumeORM.title.contains("Python"),
+                ResumeORM.compensation > 40000
+            ))\
+            .group_by(ResumeORM.workload)
+
+            print(query.compile(compile_kwargs={"literal_binds": True}))
+            res = session.execute(query)
+            result = res.all()
+            print(f"{result=}")
 
 
 class AsyncORM:

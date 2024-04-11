@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import os
 import sys
 
@@ -12,6 +13,13 @@ sys.path.insert(1, os.path.join(sys.path[0], ".."))
 # SyncCore.update_workers()
 # SyncCore.select_workers()
 
-SyncORM.select_workers()
-SyncORM.update_worker()
-SyncORM.select_workers()
+# SyncORM.select_workers()
+# SyncORM.update_worker()
+# SyncORM.select_workers()
+
+# SyncORM.insert_resume(title="Python Middle Developer",
+#                       compensation=330_000,
+#                       workload="fulltime",
+#                       worker_id=2)
+
+SyncORM.select_resumes()
