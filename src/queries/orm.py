@@ -1,6 +1,7 @@
-from models import WorkerORM, ResumeORM
+from models import WorkerORM, ResumeORM, VacancyORM
 from database import Base, session_factory, sync_engine, async_session_factory
 from sqlalchemy import Integer, and_, func, select
+from sqlalchemy.orm import joinedload, selectinload
 
 
 class SyncORM:
@@ -73,6 +74,27 @@ class SyncORM:
             res = session.execute(query)
             result = res.all()
             print(f"{result=}")
+
+    @staticmethod
+    def insert_vacancies():
+        with session_factory() as session:
+            new_vacancy = VacancyORM(title="Python Developer", compensation=130_000)
+            resume_1 = session.get(ResumeORM, 1)
+            resume_2 = session.get(ResumeORM, 2)
+            resume_1.vacancies_replied.append(new_vacancy)
+            resume_2.vacancies_replied.append(new_vacancy)
+            session.commit()
+
+    @staticmethod
+    def select_full_resumes():
+        with session_factory() as session:
+            query=select(ResumeORM)\
+            .options(joinedload(ResumeORM.worker))\
+            .options(selectinload(ResumeORM.vacancies_replied))
+
+            res = session.execute(query)
+            resumes = res.unique().scalars().all()
+            print(f"{resumes=}")
 
 
 class AsyncORM:

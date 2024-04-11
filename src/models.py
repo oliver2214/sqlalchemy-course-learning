@@ -2,7 +2,7 @@ import datetime
 import enum
 from typing import Annotated
 from sqlalchemy import ForeignKey, Table, String, Integer, MetaData, Column, text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
@@ -24,6 +24,10 @@ class WorkerORM(Base):
     id: Mapped[intpk]
     username: Mapped[str]
 
+    resumes: Mapped[list["ResumeORM"]] = relationship(
+        back_populates="worker",
+    )
+
 
 class ResumeORM(Base):
     __tablename__ = "resumes"
@@ -34,6 +38,39 @@ class ResumeORM(Base):
     worker_id: Mapped[int] = mapped_column(ForeignKey("workers.id"))
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
+
+    worker: Mapped[WorkerORM] = relationship(
+        back_populates="resumes"
+    )
+
+    vacancies_replied: Mapped[list["VacancyORM"] | None] = relationship(
+        back_populates="resumes_replied",
+        secondary="vacancies_replies"
+    )
+
+
+class VacancyORM(Base):
+    __tablename__ = "vacancies"
+    id: Mapped[intpk]
+    title: Mapped[str_50]
+    compensation: Mapped[int | None]
+
+    resumes_replied: Mapped[list["ResumeORM"] | None] = relationship(
+        back_populates="vacancies_replied",
+        secondary="vacancies_replies"
+    )
+
+
+class VacanciesReplyORM(Base):
+    __tablename__ = "vacancies_replies"
+    resume_id: Mapped[int] = mapped_column(
+        ForeignKey("resumes.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+    vacancy_id: Mapped[int] = mapped_column(
+        ForeignKey("vacancies.id", ondelete="CASCADE"),
+        primary_key=True
+    )
 
 
 metadata_obj = MetaData()

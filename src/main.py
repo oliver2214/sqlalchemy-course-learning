@@ -17,9 +17,18 @@ sys.path.insert(1, os.path.join(sys.path[0], ".."))
 # SyncORM.update_worker()
 # SyncORM.select_workers()
 
+# SyncORM.create_tables()
+
+# SyncORM.insert_data()
+# SyncORM.insert_resume(title="Python Junior Developer",
+#                       compensation=50_000,
+#                       workload="fulltime",
+#                       worker_id=1)
 # SyncORM.insert_resume(title="Python Middle Developer",
-#                       compensation=330_000,
+#                       compensation=150_000,
 #                       workload="fulltime",
 #                       worker_id=2)
+# SyncORM.insert_vacancies()
+SyncORM.select_full_resumes()
 
-SyncORM.select_resumes()
+# SyncORM.select_resumes()
