@@ -25,7 +25,7 @@ class WorkerORM(Base):
     username: Mapped[str]
 
 
-class ResumesOrm(Base):
+class ResumesORM(Base):
     __tablename__ = "resumes"
     id: Mapped[intpk]
     title: Mapped[str_50]

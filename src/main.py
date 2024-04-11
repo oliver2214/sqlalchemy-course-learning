@@ -1,11 +1,17 @@
 import asyncio
 import os
 import sys
-from queries.orm import async_insert_data, create_tables
+
+from queries.core import SyncCore, AsyncCore
+from queries.orm import SyncORM, AsyncORM
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
 
-create_tables()
-# insert_data()
 
-asyncio.run(async_insert_data())
+# SyncCore.select_workers()
+# SyncCore.update_workers()
+# SyncCore.select_workers()
+
+SyncORM.select_workers()
+SyncORM.update_worker()
+SyncORM.select_workers()
