@@ -28,7 +28,20 @@ sys.path.insert(1, os.path.join(sys.path[0], ".."))
 #                       compensation=150_000,
 #                       workload="fulltime",
 #                       worker_id=2)
+# SyncORM.insert_resume(title="Python Senior Developer",
+#                       compensation=350_000,
+#                       workload="fulltime",
+#                       worker_id=2)
+# SyncORM.insert_resume(title="Python Middle Developer",
+#                       compensation=150_000,
+#                       workload="parttime",
+#                       worker_id=1)
 # SyncORM.insert_vacancies()
-SyncORM.select_full_resumes()
+# SyncORM.select_full_resumes()
 
 # SyncORM.select_resumes()
+
+# SyncORM.create_tables()
+# SyncORM.insert_into_persons()
+
+SyncORM.select_avg_compensation("Python", 40000)

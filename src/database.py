@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine
+from typing import Annotated
+from sqlalchemy import String, create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from config import settings
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
@@ -18,9 +19,13 @@ session_factory = sessionmaker(sync_engine)
 async_session_factory = async_sessionmaker(async_engine)
 
 
-class Base(DeclarativeBase):
-    pass
+str_16 = Annotated[str, 16]
 
+
+class Base(DeclarativeBase):
+    type_annotation_map = {
+        str_16: String(16)
+    }
     repr_cols_num = 3
     repr_cols = tuple()
 

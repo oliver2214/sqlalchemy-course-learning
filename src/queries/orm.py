@@ -1,6 +1,6 @@
-from models import WorkerORM, ResumeORM, VacancyORM
+from models import Persons, WorkerORM, ResumeORM, VacancyORM
 from database import Base, session_factory, sync_engine, async_session_factory
-from sqlalchemy import Integer, and_, func, select
+from sqlalchemy import Integer, and_, cast, func, select
 from sqlalchemy.orm import joinedload, selectinload
 
 
@@ -36,14 +36,6 @@ class SyncORM:
             session.commit()
 
     @staticmethod
-    def select_workers():
-        with session_factory() as session:
-            query = select(WorkerORM)
-            result = session.execute(query)
-            workers = result.scalars().all()
-            print(f"{workers=}")
-
-    @staticmethod
     def select_worker():
         with session_factory() as session:
             worker = session.get(WorkerORM, {"id": 1})
@@ -58,17 +50,46 @@ class SyncORM:
             session.commit()
 
     @staticmethod
+    def select_avg_compensation(like_language: str, gt_compenstaion: int):
+        '''SELECT round(avg(compensation), 2), workload
+            FROM resumes
+            where
+                title like '%Junior%'
+                and compensation > 40000
+            group by
+                workload'''
+        with session_factory() as session:
+            query = (
+                select(
+                    ResumeORM.workload,
+                    cast(func.avg(ResumeORM.compensation), Integer).label("avg_compensation"),
+                )
+                .select_from(ResumeORM)
+                .filter(and_(
+                    ResumeORM.title.contains(like_language),
+                    ResumeORM.compensation > gt_compenstaion,
+                ))
+                .group_by(ResumeORM.workload)
+            )
+
+            print(query.compile(compile_kwargs={"literal_binds": True}))
+            res = session.execute(query)
+            result = res.all()
+            print(result)
+
+    @staticmethod
     def select_resumes():
         with session_factory() as session:
-            query = select(
-                ResumeORM.workload,
-                func.avg(ResumeORM.compensation).cast(Integer).label("avg_compensation")
-            )\
-            .filter(and_(
-                ResumeORM.title.contains("Python"),
-                ResumeORM.compensation > 40000
-            ))\
-            .group_by(ResumeORM.workload)
+            query = (
+                select(
+                    ResumeORM.workload,
+                    func.avg(ResumeORM.compensation).cast(Integer).label("avg_compensation")
+                )
+                .filter(and_(
+                    ResumeORM.title.contains("Python"),
+                    ResumeORM.compensation > 40000
+                ))
+                .group_by(ResumeORM.workload))
 
             print(query.compile(compile_kwargs={"literal_binds": True}))
             res = session.execute(query)
@@ -88,13 +109,20 @@ class SyncORM:
     @staticmethod
     def select_full_resumes():
         with session_factory() as session:
-            query=select(ResumeORM)\
-            .options(joinedload(ResumeORM.worker))\
-            .options(selectinload(ResumeORM.vacancies_replied))
+            query = (select(ResumeORM)
+                     .options(joinedload(ResumeORM.worker))
+                     .options(selectinload(ResumeORM.vacancies_replied)))
 
             res = session.execute(query)
             resumes = res.unique().scalars().all()
             print(f"{resumes=}")
+
+    @staticmethod
+    def insert_into_persons():
+        with session_factory() as session:
+            person = Persons(name="Yellow")
+            session.add(person)
+            session.commit()
 
 
 class AsyncORM:

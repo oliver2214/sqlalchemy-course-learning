@@ -3,9 +3,9 @@ import enum
 from typing import Annotated
 from sqlalchemy import ForeignKey, Table, String, Integer, MetaData, Column, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from database import Base
+from database import Base, str_16
 
-intpk = Annotated[int, mapped_column(primary_key=True)]
+intpk = Annotated[int, mapped_column(Integer, primary_key=True)]
 created_at = Annotated[datetime.datetime, mapped_column(
     server_default=text("TIMEZONE('utc', now())"))]
 updated_at = Annotated[datetime.datetime, mapped_column(
@@ -27,6 +27,12 @@ class WorkerORM(Base):
     resumes: Mapped[list["ResumeORM"]] = relationship(
         back_populates="worker",
     )
+
+
+class Persons(Base):
+    __tablename__ = "persons"
+    id = mapped_column(Integer, primary_key=True)
+    name: Mapped[str_16]
 
 
 class ResumeORM(Base):
@@ -71,6 +77,25 @@ class VacanciesReplyORM(Base):
         ForeignKey("vacancies.id", ondelete="CASCADE"),
         primary_key=True
     )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 metadata_obj = MetaData()
