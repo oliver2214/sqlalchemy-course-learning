@@ -34,14 +34,25 @@ class SyncCore:
             query = select(workers_table)
             result = conn.execute(query)
             workers = result.all()
-            print(workers)
+            print(f"{workers=}")
 
     @staticmethod
-    def update_workers():
+    def update_workers(worker_id: int = 2, new_username: str = "Misha"):
         with sync_engine.connect() as conn:
-            stmt = update(workers_table).values(username="Aydar")\
-                .where(workers_table.c.id == 2)
+            stmt = text("UPDATE workers SET username=:new_username WHERE id=:id")
+            stmt = stmt.bindparams(new_username=new_username, id=worker_id)
             conn.execute(stmt)
+            conn.commit()
+
+    @staticmethod
+    def update_worker(worker_id: int = 2, new_username: str = "Misha"):
+        with sync_engine.connect() as conn:
+            query = (
+                update(workers_table)
+                .values(username=new_username)
+                .filter_by(id=worker_id)
+            )
+            conn.execute(query)
             conn.commit()
 
 

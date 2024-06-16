@@ -9,21 +9,16 @@ from queries.orm import SyncORM, AsyncORM
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
 
 
-# SyncCore.select_workers()
-# SyncCore.update_workers()
-# SyncCore.select_workers()
-
 # SyncORM.select_workers()
 # SyncORM.update_worker()
 # SyncORM.select_workers()
 
 # SyncORM.create_tables()
 
-# SyncORM.insert_data()
-# SyncORM.insert_resume(title="Python Junior Developer",
-#                       compensation=50_000,
+# SyncORM.insert_resume(title="Java Senior Developer",
+#                       compensation=400_000,
 #                       workload="fulltime",
-#                       worker_id=1)
+#                       worker_id=3)
 # SyncORM.insert_resume(title="Python Middle Developer",
 #                       compensation=150_000,
 #                       workload="fulltime",
@@ -42,6 +37,4 @@ sys.path.insert(1, os.path.join(sys.path[0], ".."))
 # SyncORM.select_resumes()
 
 # SyncORM.create_tables()
-# SyncORM.insert_into_persons()
-
-SyncORM.select_avg_compensation("Python", 40000)
+SyncORM.join_cte_subquery_window_func()

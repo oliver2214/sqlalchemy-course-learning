@@ -1,7 +1,7 @@
 from models import Persons, WorkerORM, ResumeORM, VacancyORM
 from database import Base, session_factory, sync_engine, async_session_factory
 from sqlalchemy import Integer, and_, cast, func, select
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload, selectinload, aliased
 
 
 class SyncORM:
@@ -16,6 +16,13 @@ class SyncORM:
         worker_vlad = WorkerORM(username="Vlad")
         with session_factory() as session:
             session.add_all([worker_bobr, worker_vlad])
+            session.commit()
+
+    @staticmethod
+    def insert_worker(username: str):
+        worker = WorkerORM(username=username)
+        with session_factory() as session:
+            session.add(worker)
             session.commit()
 
     @staticmethod
@@ -38,8 +45,16 @@ class SyncORM:
     @staticmethod
     def select_worker():
         with session_factory() as session:
-            worker = session.get(WorkerORM, {"id": 1})
+            worker = session.get(WorkerORM, 1)
             print(f"{worker.username=}")
+
+    @staticmethod
+    def select_workers():
+        with session_factory() as session:
+            workers = select(WorkerORM)
+            result = session.execute(workers)
+            workers = result.all()
+            print(f"{workers=}")
 
     @staticmethod
     def update_worker():
@@ -123,6 +138,65 @@ class SyncORM:
             person = Persons(name="Yellow")
             session.add(person)
             session.commit()
+
+    @staticmethod
+    def join_cte_subquery_window_func(programming_language:str = "Python"):
+        '''WITH
+                helper2 AS (
+                    SELECT
+                        *,
+                        compensation - avg_compensation_by_workload AS compensation_diff
+                    FROM (
+                            SELECT
+                                w.username, r.compensation, workload, avg(r.compensation) OVER (
+                                    PARTITION BY
+                                        workload
+                                )::int AS avg_compensation_by_workload
+                            FROM resumes r
+                                JOIN workers w ON w.id = r.worker_id
+                        ) helper1
+                )
+            SELECT *
+            FROM helper2
+            ORDER BY compensation_diff DESC'''
+        with session_factory() as session:
+            r = aliased(ResumeORM)
+            w = aliased(WorkerORM)
+            subq = (
+                select(
+                    r,
+                    w,
+                    func.avg(r.compensation).over(partition_by=r.workload).cast(Integer).label("avg_compensation_by_workload"),
+                )
+                .select_from(r)
+                .join(w, w.id == r.worker_id)
+                .subquery("helper1")
+            )
+
+            cte = (
+                select(
+                    subq.c.worker_id,
+                    subq.c.username,
+                    subq.c.compensation,
+                    subq.c.workload,
+                    subq.c.avg_compensation_by_workload,
+                    (subq.c.compensation - subq.c.avg_compensation_by_workload).label("compensation_diff")
+                )
+                .cte("helper2")
+            )
+
+            query = (
+                select(cte)
+                .order_by(cte.c.compensation_diff.desc())
+            )
+
+            result = session.execute(query)
+            result = result.all()
+
+            print(f"{result=}")
+
+
+
 
 
 class AsyncORM:
