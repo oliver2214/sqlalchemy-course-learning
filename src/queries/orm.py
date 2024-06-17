@@ -1,4 +1,4 @@
-from models import Persons, WorkerORM, ResumeORM, VacancyORM
+from models import Persons, Profiles, WorkerORM, ResumeORM, VacancyORM
 from database import Base, session_factory, sync_engine, async_session_factory
 from sqlalchemy import Integer, and_, cast, func, select
 from sqlalchemy.orm import joinedload, selectinload, aliased
@@ -194,6 +194,68 @@ class SyncORM:
             result = result.all()
 
             print(f"{result=}")
+
+    @staticmethod
+    def insert_persons_profiles():
+        with session_factory() as session:
+            person = Persons(name="Aydar")
+            profile1 = Profiles(age=27, person_id=2)
+            profile2 = Profiles(age=47, person_id=2)
+
+            session.add_all([person, profile1, profile2])
+            session.commit()
+
+
+    @staticmethod
+    def select_person_with_lazy_relationship():
+        with session_factory() as session:
+            query = select(Persons)
+
+            result = session.execute(query)
+            persons = result.scalars().all()
+
+            profiles1 = persons[0].profiles
+            print(f"{profiles1=}")
+
+            profiles2 = persons[1].profiles
+            print(f"{profiles2=}")
+
+    @staticmethod
+    def select_person_with_joined_relationship():
+        with session_factory() as session:
+            query = (
+                select(Persons)
+                .options(joinedload(Persons.profiles))
+            )
+
+            result = session.execute(query)
+            persons = result.unique().scalars().all()
+
+            profiles1 = persons[0].profiles
+            print(f"{profiles1=}")
+
+            profiles2 = persons[1].profiles
+            print(f"{profiles2=}")
+
+    @staticmethod
+    def select_person_with_selectinload_relationship():
+        with session_factory() as session:
+            query = (
+                select(Persons)
+                .options(selectinload(Persons.profiles))
+            )
+
+            result = session.execute(query)
+            persons = result.unique().scalars().all()
+
+            profiles1 = persons[0].profiles
+            print(f"{profiles1=}")
+
+            profiles2 = persons[1].profiles
+            print(f"{profiles2=}")
+
+
+
 
 
 

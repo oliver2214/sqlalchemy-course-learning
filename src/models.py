@@ -31,8 +31,19 @@ class WorkerORM(Base):
 
 class Persons(Base):
     __tablename__ = "persons"
+
     id = mapped_column(Integer, primary_key=True)
     name: Mapped[str_16]
+    profiles: Mapped[list["Profiles"]] = relationship()
+
+
+class Profiles(Base):
+    __tablename__ = "profiles"
+
+    id: Mapped[intpk]
+    age: Mapped[int]
+    person_id: Mapped[int] = mapped_column(ForeignKey("persons.id"))
+    person: Mapped["Persons"] = relationship()
 
 
 class ResumeORM(Base):

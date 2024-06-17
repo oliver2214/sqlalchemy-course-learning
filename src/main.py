@@ -37,4 +37,8 @@ sys.path.insert(1, os.path.join(sys.path[0], ".."))
 # SyncORM.select_resumes()
 
 # SyncORM.create_tables()
-SyncORM.join_cte_subquery_window_func()
+# SyncORM.join_cte_subquery_window_func()
+
+# SyncORM.select_person_with_lazy_relationship()
+# SyncORM.select_person_with_joined_relationship()
+# SyncORM.select_person_with_selectinload_relationship()
