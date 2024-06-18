@@ -1,7 +1,7 @@
 from models import Persons, Profiles, WorkerORM, ResumeORM, VacancyORM
 from database import Base, session_factory, sync_engine, async_session_factory
 from sqlalchemy import Integer, and_, cast, func, select
-from sqlalchemy.orm import joinedload, selectinload, aliased
+from sqlalchemy.orm import joinedload, selectinload, aliased, contains_eager
 
 
 class SyncORM:
@@ -209,10 +209,14 @@ class SyncORM:
     @staticmethod
     def select_person_with_lazy_relationship():
         with session_factory() as session:
-            query = select(Persons)
+            query = (
+                select(Persons)
+                .join(Profiles)
+                .options(contains_eager((Persons.profiles)))
+            )
 
             result = session.execute(query)
-            persons = result.scalars().all()
+            persons = result.unique().scalars().all()
 
             profiles1 = persons[0].profiles
             print(f"{profiles1=}")
@@ -242,7 +246,7 @@ class SyncORM:
         with session_factory() as session:
             query = (
                 select(Persons)
-                .options(selectinload(Persons.profiles))
+                .options(selectinload(Persons.profiles_gr_30))
             )
 
             result = session.execute(query)

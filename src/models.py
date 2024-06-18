@@ -1,7 +1,7 @@
 import datetime
 import enum
 from typing import Annotated
-from sqlalchemy import ForeignKey, Table, String, Integer, MetaData, Column, text
+from sqlalchemy import CheckConstraint, ForeignKey, Index, Table, String, Integer, MetaData, Column, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base, str_16
 
@@ -34,7 +34,16 @@ class Persons(Base):
 
     id = mapped_column(Integer, primary_key=True)
     name: Mapped[str_16]
-    profiles: Mapped[list["Profiles"]] = relationship()
+    profiles: Mapped[list["Profiles"]] = relationship(back_populates="person")
+
+    profiles_gr_30: Mapped[list["Profiles"]]=relationship(
+        back_populates="person",
+        primaryjoin="and_(Persons.id==Profiles.person_id, Profiles.age==47)"
+    )
+
+    __table_args__ = (
+        Index("name_index", "name"),
+    )
 
 
 class Profiles(Base):
@@ -43,7 +52,11 @@ class Profiles(Base):
     id: Mapped[intpk]
     age: Mapped[int]
     person_id: Mapped[int] = mapped_column(ForeignKey("persons.id"))
-    person: Mapped["Persons"] = relationship()
+    person: Mapped["Persons"] = relationship(back_populates="profiles")
+
+    __table_args__ = (
+        CheckConstraint("age >= 0 AND age <= 120", name="age_constraint"),
+    )
 
 
 class ResumeORM(Base):

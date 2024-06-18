@@ -13,7 +13,7 @@ sys.path.insert(1, os.path.join(sys.path[0], ".."))
 # SyncORM.update_worker()
 # SyncORM.select_workers()
 
-# SyncORM.create_tables()
+SyncORM.create_tables()
 
 # SyncORM.insert_resume(title="Java Senior Developer",
 #                       compensation=400_000,
