@@ -198,11 +198,19 @@ class SyncORM:
     @staticmethod
     def insert_persons_profiles():
         with session_factory() as session:
-            person = Persons(name="Aydar")
-            profile1 = Profiles(age=27, person_id=2)
-            profile2 = Profiles(age=47, person_id=2)
+            persons = []
+            persons.extend((Persons(name="Dima"),
+                           Persons(name="Aydar"),))
+            session.add_all(persons)
+            session.flush()
 
-            session.add_all([person, profile1, profile2])
+            profiles = []
+            profiles.extend((Profiles(age=22, person_id=persons[0].id),
+                            Profiles(age=42, person_id=persons[0].id),
+                            Profiles(age=27, person_id=persons[1].id),
+                            Profiles(age=47, person_id=persons[1].id),))
+
+            session.add_all(profiles)
             session.commit()
 
 
