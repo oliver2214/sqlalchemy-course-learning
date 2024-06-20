@@ -36,6 +36,11 @@ class Persons(Base):
     name: Mapped[str_16]
     profiles: Mapped[list["Profiles"]] = relationship(back_populates="person")
 
+    books: Mapped[list["Books"]] = relationship(
+        back_populates="persons",
+        secondary="book_reservations"
+    )
+
     profiles_gr_30: Mapped[list["Profiles"]]=relationship(
         back_populates="person",
         primaryjoin="and_(Persons.id==Profiles.person_id, Profiles.age==47)"
@@ -57,6 +62,29 @@ class Profiles(Base):
     __table_args__ = (
         CheckConstraint("age >= 0 AND age <= 120", name="age_constraint"),
     )
+
+
+class Books(Base):
+    __tablename__ = "books"
+
+    id: Mapped[intpk]
+    title: Mapped[str]
+
+    persons: Mapped[list["Persons"]] = relationship(
+        back_populates="books",
+        secondary="book_reservations",
+    )
+
+
+class Reservations(Base):
+    __tablename__ = "book_reservations"
+
+    book_id: Mapped[int] = mapped_column(
+        ForeignKey("books.id", ondelete="CASCADE"),
+        primary_key=True,)
+    person_id: Mapped[int] = mapped_column(
+        ForeignKey("persons.id", ondelete="CASCADE"),
+        primary_key=True,)
 
 
 class ResumeORM(Base):

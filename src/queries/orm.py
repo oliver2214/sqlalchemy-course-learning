@@ -1,4 +1,4 @@
-from models import Persons, Profiles, WorkerORM, ResumeORM, VacancyORM
+from models import Books, Persons, Profiles, WorkerORM, ResumeORM, VacancyORM
 from database import Base, session_factory, sync_engine, async_session_factory
 from sqlalchemy import Integer, and_, cast, func, select
 from sqlalchemy.orm import joinedload, selectinload, aliased, contains_eager
@@ -265,6 +265,42 @@ class SyncORM:
 
             profiles2 = persons[1].profiles
             print(f"{profiles2=}")
+
+
+    @staticmethod
+    def add_book_reservations():
+        with session_factory() as session:
+            person_1 = session.get(Persons, 1)
+            person_2 = session.get(Persons, 2)
+
+            book_1 = Books(title="Lutz")
+            book_2 = Books(title="Repka")
+
+            book_3 = Books(title="Novel")
+            book_4 = Books(title="Dad")
+
+            person_1.books.append(book_1)
+            person_1.books.append(book_2)
+
+            person_2.books.append(book_3)
+            person_2.books.append(book_4)
+
+            session.commit()
+
+    @staticmethod
+    def select_book_reservations():
+        with session_factory() as session:
+            query = (
+                select(Persons)
+                .options(selectinload(Persons.books))
+            )
+
+            res = session.execute(query)
+            persons_with_books = res.unique().scalars().all()
+            print(f"{persons_with_books=}")
+            print(f"{persons_with_books[0].books=}")
+
+
 
 
 

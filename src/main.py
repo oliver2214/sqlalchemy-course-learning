@@ -43,4 +43,6 @@ sys.path.insert(1, os.path.join(sys.path[0], ".."))
 # SyncORM.select_person_with_joined_relationship()
 # SyncORM.select_person_with_selectinload_relationship()
 
-SyncORM.insert_persons_profiles()
+# SyncORM.insert_persons_profiles()
+# SyncORM.add_book_reservations()
+SyncORM.select_book_reservations()
