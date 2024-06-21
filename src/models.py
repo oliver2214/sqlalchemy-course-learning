@@ -60,7 +60,7 @@ class Profiles(Base):
     person: Mapped["Persons"] = relationship(back_populates="profiles")
 
     __table_args__ = (
-        CheckConstraint("age >= 0 AND age <= 120", name="age_constraint"),
+        CheckConstraint("age >= 0 AND age <= 130", name="age_constraint"),
     )
 
 
@@ -116,6 +116,10 @@ class VacancyORM(Base):
     resumes_replied: Mapped[list["ResumeORM"] | None] = relationship(
         back_populates="vacancies_replied",
         secondary="vacancies_replies"
+    )
+
+    __table_args__ = (
+        Index("title_index", "title"),
     )
 
 
