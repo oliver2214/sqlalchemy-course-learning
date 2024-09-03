@@ -1,7 +1,7 @@
 import datetime
 import enum
 from typing import Annotated
-from sqlalchemy import CheckConstraint, ForeignKey, Index, Table, String, Integer, MetaData, Column, text
+from sqlalchemy import CheckConstraint, ForeignKey, Index, Table, String, Integer, MetaData, Column, text, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base, str_16
 
@@ -12,6 +12,66 @@ updated_at = Annotated[datetime.datetime, mapped_column(
     server_default=text("TIMEZONE('utc', now())"),
     onupdate=datetime.datetime.utcnow)]
 str_50 = Annotated[str, 50]
+
+
+class ReaderORM(Base):
+    __tablename__ = "reader"
+
+    reader_id: Mapped[intpk]
+    name: Mapped[str] = mapped_column(String(64))
+    surname: Mapped[str] = mapped_column(String(128))
+    phone: Mapped[str] = mapped_column(String(20), nullable=True)
+    age: Mapped[int] = mapped_column(Integer, nullable=True)
+    email: Mapped[str] = mapped_column(String(128))
+    password: Mapped[str] = mapped_column(String(128))
+    balance: Mapped[float] = mapped_column(Numeric)
+
+    books: Mapped[list["BookORM"]] = relationship(
+        back_populates="readers",
+        secondary="reservation",
+    )
+
+    __table_args__ = (
+        CheckConstraint("balance >= 0", name="balance_constraint"),
+        CheckConstraint("age >= 0", name="age_constraint"),
+        Index("reader_email_index", "email"),
+    )
+
+
+class BookORM(Base):
+    __tablename__ = "book"
+
+    book_id: Mapped[intpk]
+    title: Mapped[str] = mapped_column(String(256), nullable=True)
+    genre: Mapped[str] = mapped_column(String(128), nullable=True)
+    year_publishing: Mapped[str] = mapped_column(String(4), nullable=True)
+    page_count: Mapped[int]
+    book_price: Mapped[float] = mapped_column(Numeric)
+
+    readers: Mapped[list["ReaderORM"]] = relationship(
+        back_populates="books",
+        secondary="reservation",
+    )
+
+    __table_args__ = (
+        CheckConstraint("book_price >= 0", name="book_price_constraint"),
+        CheckConstraint("page_count >= 0", name="page_count_constraint"),
+        Index("book_title_index", "title"),
+    )
+
+
+class ReservationORM(Base):
+    __tablename__ = "reservation"
+
+    reservation_id: Mapped[intpk]
+    book_id: Mapped[int] = mapped_column(
+        ForeignKey("book.book_id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    reader_id: Mapped[int] = mapped_column(
+        ForeignKey("reader.reader_id", ondelete="CASCADE"),
+        primary_key=True,
+    )
 
 
 class Workload(enum.Enum):
@@ -41,7 +101,7 @@ class Persons(Base):
         secondary="book_reservations"
     )
 
-    profiles_gr_30: Mapped[list["Profiles"]]=relationship(
+    profiles_gr_30: Mapped[list["Profiles"]] = relationship(
         back_populates="person",
         primaryjoin="and_(Persons.id==Profiles.person_id, Profiles.age==47)"
     )
